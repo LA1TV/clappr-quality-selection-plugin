@@ -1,0 +1,54 @@
+@import "compass/css3";
+
+.quality-selection-plugin {
+	position: relative !important;
+	display: inline-block !important;
+	float: right !important;
+	height: 32px !important;
+	margin: 0 6px !important;
+
+	.qualities-container {
+		&[data-visible="1"] {
+			display: inline-block;
+		}
+
+		position: absolute;
+		bottom: 100%;
+		right: 0;
+		display: none;
+		list-style-type: none;
+		background-color: #aaaaaa;
+		border-color: #000000;
+		border-width: 1px;
+		border-style: solid;
+		@include box-shadow(3px 3px 5px 0px rgba(50, 50, 50, 0.75));
+
+		.quality-row {
+
+			&.no-qualities-msg {
+				font-style: italic;
+			}
+
+			padding: 1px 8px;
+			font-size: 13px;
+			white-space: nowrap;
+			cursor: default;
+
+			&[data-clickable] {
+				cursor: pointer;
+
+				&:hover {
+					background-color: #ffffff;
+				}
+			}
+		}
+	}
+
+	.chosen-quality {
+		display: inline-block;
+		vertical-align: bottom;
+		color: #ffffff;
+		font-size: 12px;
+		cursor: pointer;
+	}
+}
