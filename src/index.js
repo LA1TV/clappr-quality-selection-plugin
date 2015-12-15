@@ -16,8 +16,7 @@ export default class QualitySelectionPlugin extends UICorePlugin {
     this._qualities = []
     this._chosenQuality = null
     this._renderedQualities = []
-    this._overChosenQuality = false
-    this._overList = false
+    this._overPlugin = false
     this._qualityChosenCallback = null
     this._hoverTimerId = null
     this._renderPlugin()
@@ -78,7 +77,7 @@ export default class QualitySelectionPlugin extends UICorePlugin {
         this._qualities.forEach((quality) => {
           var $quality = $("<li />").addClass("quality-row").attr("data-clickable", "1").text(quality.name)
           $quality.click(() => {
-            this._overList = false
+            this._overPlugin = false
             this._renderPlugin()
             if (this._qualityChosenCallback) {
               this._qualityChosenCallback(quality)
@@ -93,7 +92,7 @@ export default class QualitySelectionPlugin extends UICorePlugin {
         this._$qualities[i][quality === this._chosenQuality ? "hide" : "show"]()
       }
       this._$chosenQuality.text("Quality: "+this._chosenQuality.name)
-      var visible = this._overChosenQuality || this._overList || this._hoverTimerId !== null
+      var visible = this._overPlugin || this._hoverTimerId !== null
       this._$qualitiesContainer.attr("data-visible", visible ? "1" : "0")
     }
   }
@@ -128,19 +127,11 @@ export default class QualitySelectionPlugin extends UICorePlugin {
     this._$qualitiesContainer.append(this._$noQualitiesMsg)
     this._$qualities = []
     this._$chosenQuality = $("<div />").addClass("chosen-quality")
-    this._$chosenQuality.hover(() => {
-      this._overChosenQuality = true
-      this._renderPlugin()
-    }, () => {
-      this._overChosenQuality = false
-      this._onMouseOut()
-      this._renderPlugin()
-    })
     $el.hover(() => {
-      this._overList = true
+      this._overPlugin = true
       this._renderPlugin()
     }, () => {
-      this._overList = false
+      this._overPlugin = false
       this._onMouseOut()
       this._renderPlugin()
     })
