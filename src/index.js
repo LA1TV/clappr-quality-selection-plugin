@@ -19,6 +19,7 @@ export default class QualitySelectionPlugin extends UICorePlugin {
     this._overChosenQuality = false
     this._overList = false
     this._qualityChosenCallback = null
+    this._hoverTimerId = null
     this._renderPlugin()
   }
 
@@ -92,7 +93,7 @@ export default class QualitySelectionPlugin extends UICorePlugin {
         this._$qualities[i][quality === this._chosenQuality ? "hide" : "show"]()
       }
       this._$chosenQuality.text("Quality: "+this._chosenQuality.name)
-      var visible = this._overChosenQuality || this._overList
+      var visible = this._overChosenQuality || this._overList || this._hoverTimerId !== null
       this._$qualitiesContainer.attr("data-visible", visible ? "1" : "0")
     }
   }
@@ -109,6 +110,16 @@ export default class QualitySelectionPlugin extends UICorePlugin {
     return false
   }
 
+  _onMouseOut() {
+    if (this._hoverTimerId !== null) {
+      clearTimeout(this._hoverTimerId)
+    }
+    this._hoverTimerId = setTimeout(() => {
+      this._hoverTimerId = null
+      this._renderPlugin()
+    }, 150)
+  }
+
   render() {
     var $el = $(this.el)
     $el.attr("data-enabled", "0")
@@ -122,6 +133,7 @@ export default class QualitySelectionPlugin extends UICorePlugin {
       this._renderPlugin()
     }, () => {
       this._overChosenQuality = false
+      this._onMouseOut()
       this._renderPlugin()
     })
     $el.hover(() => {
@@ -129,6 +141,7 @@ export default class QualitySelectionPlugin extends UICorePlugin {
       this._renderPlugin()
     }, () => {
       this._overList = false
+      this._onMouseOut()
       this._renderPlugin()
     })
     $el.append(this._$qualitiesContainer)
@@ -138,6 +151,9 @@ export default class QualitySelectionPlugin extends UICorePlugin {
   }
 
   destroy() {
-    // TODO
+    if (this._hoverTimerId) {
+      clearTimeout(this._hoverTimerId)
+      this._hoverTimerId = null
+    }
   }
 }
