@@ -2,10 +2,14 @@
 
 .quality-selection-plugin {
 	position: relative !important;
-	display: inline-block !important;
+	display: none !important;
 	float: right !important;
 	height: 32px !important;
 	margin: 0 6px !important;
+
+	&[data-enabled="1"] {
+		display: inline-block !important;
+	}
 
 	.qualities-container {
 		&[data-visible="1"] {
@@ -17,19 +21,18 @@
 		right: 0;
 		display: none;
 		list-style-type: none;
-		background-color: #aaaaaa;
+		background-color: #ffffff;
 		border-color: #000000;
 		border-width: 1px;
 		border-style: solid;
-		@include box-shadow(3px 3px 5px 0px rgba(50, 50, 50, 0.75));
+		@include box-shadow(3px 3px 5px 0px rgba(0, 0, 0, 0.75));
 
 		.quality-row {
-
 			&.no-qualities-msg {
 				font-style: italic;
 			}
 
-			padding: 1px 8px;
+			padding: 2px 10px;
 			font-size: 13px;
 			white-space: nowrap;
 			cursor: default;
@@ -38,17 +41,19 @@
 				cursor: pointer;
 
 				&:hover {
-					background-color: #ffffff;
+					background-color: #333333;
+					color: #ffffff;
 				}
 			}
 		}
 	}
 
 	.chosen-quality {
-		display: inline-block;
-		vertical-align: bottom;
-		color: #ffffff;
+		display: block;
+		vertical-align: baseline;
+		line-height: 32px;
 		font-size: 12px;
 		cursor: pointer;
+		color: #ffffff;
 	}
 }

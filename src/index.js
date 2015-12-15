@@ -14,61 +14,42 @@ export default class QualitySelectionPlugin extends UICorePlugin {
   constructor(core) {
     super(core)
     this._qualities = []
-    var chosen = {text:"360p"};
-    this._qualities = [
-      {text:"720p"},
-      chosen,
-      {text:"240p"},
-    ];
     this._chosenQuality = null
-    this._chosenQuality = chosen
     this._renderedQualities = []
     this._overChosenQuality = false
     this._overList = false
+    this._qualityChosenCallback = null
     this._renderPlugin()
   }
 
   bindEvents() {
     this.listenTo(this.core.mediaControl, Events.MEDIACONTROL_RENDERED, this._onMediaControlRendered)
-    this.listenTo(this.core.mediaControl, Events.MEDIACONTROL_CONTAINERCHANGED, this._onMediaControlContainerChanged)
   }
 
-  _bindContainerEvents() {
-    if (this._oldContainer) {
-      this.stopListening(this._oldContainer, Events.CONTAINER_TIMEUPDATE, this._onTimeUpdate)
-      this.stopListening(this._oldContainer, Events.CONTAINER_MEDIACONTROL_SHOW, this._onMediaControlShow)
-    }
-    this._oldContainer = this.core.mediaControl.container
-    this.listenTo(this.core.mediaControl.container, Events.CONTAINER_TIMEUPDATE, this._onTimeUpdate)
-    this.listenTo(this.core.mediaControl.container, Events.CONTAINER_MEDIACONTROL_SHOW, this._onMediaControlShow)
+  // set the callback which will be called when a new quality is chosen,
+  // and provided the quality that was chosen as the first argument
+  setQualityChosenCallback(handler) {
+    this._qualityChosenCallback = handler
   }
 
-  _getOptions() {
-    if (!("qualitySelectionPlugin" in this.core.options)) {
-      throw "'qualitySelectionPlugin' property missing from options object."
-    }
-    return this.core.options.qualitySelectionPlugin
-  }
-
-  // array of {name}
+  // array of objects which contain a "name" property
   // will appear in the same order
   setQualities(qualities) {
-    // TODO
+    this._qualities = qualities
     this._renderPlugin()
   }
 
   // quality should be reference to a quality object passed to setQualities
   setChosenQuality(quality) {
-    // TODO
+    if (this._qualities.indexOf(quality) === -1) {
+      throw "Quality could not be found."
+    }
+    this._chosenQuality = quality
     this._renderPlugin()
   }
 
   _onMediaControlRendered() {
     this._appendElToMediaControl()
-  }
-
-  _onMediaControlContainerChanged() {
-    this._bindContainerEvents()
   }
 
   _appendElToMediaControl() {
@@ -77,11 +58,11 @@ export default class QualitySelectionPlugin extends UICorePlugin {
 
   _renderPlugin() {
     var $el = $(this.el)
-    if (this._qualities.length === 0) {
-      $el.hide()
+    if (this._qualities.length === 0 || !this._chosenQuality) {
+      $el.attr("data-enabled", "0")
     }
     else {
-      $el.show()
+      $el.attr("data-enabled", "1")
       if (this._haveQualitiesChanged()) {
         this._$qualities.forEach(($a) => {
           $a.remove();
@@ -94,10 +75,13 @@ export default class QualitySelectionPlugin extends UICorePlugin {
           this._$noQualitiesMsg.hide()
         }
         this._qualities.forEach((quality) => {
-          var $quality = $("<li />").addClass("quality-row").attr("data-clickable", "1").text(quality.text)
+          var $quality = $("<li />").addClass("quality-row").attr("data-clickable", "1").text(quality.name)
           $quality.click(() => {
             this._overList = false
             this._renderPlugin()
+            if (this._qualityChosenCallback) {
+              this._qualityChosenCallback(quality)
+            }
           })
           this._$qualities.push($quality)
           this._$qualitiesContainer.append($quality)
@@ -107,7 +91,7 @@ export default class QualitySelectionPlugin extends UICorePlugin {
         let quality = this._qualities[i]
         this._$qualities[i][quality === this._chosenQuality ? "hide" : "show"]()
       }
-      this._$chosenQuality.text("Quality: "+this._chosenQuality.text)
+      this._$chosenQuality.text("Quality: "+this._chosenQuality.name)
       var visible = this._overChosenQuality || this._overList
       this._$qualitiesContainer.attr("data-visible", visible ? "1" : "0")
     }
@@ -127,7 +111,7 @@ export default class QualitySelectionPlugin extends UICorePlugin {
 
   render() {
     var $el = $(this.el)
-    $el.hide()
+    $el.attr("data-enabled", "0")
     this._$qualitiesContainer = $("<ul />").addClass("qualities-container")
     this._$noQualitiesMsg = $("<li />").addClass("quality-row no-qualities-msg").text("No other qualities available.")
     this._$qualitiesContainer.append(this._$noQualitiesMsg)
