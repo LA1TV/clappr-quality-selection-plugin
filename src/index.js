@@ -41,11 +41,30 @@ export default class QualitySelectionPlugin extends UICorePlugin {
 
   // quality should be reference to a quality object passed to setQualities
   setChosenQuality(quality) {
-    if (this._qualities.indexOf(quality) === -1) {
+    if (!this._qualityExists(quality)) {
       throw "Quality could not be found."
     }
     this._chosenQuality = quality
     this._renderPlugin()
+  }
+
+  // same if same object reference, of if they have id properties which are equal
+  _isSameQuality(a, b) {
+    if (a === b) {
+      return true
+    }
+    var id1 = a.id;
+    var id2 = b.id;
+    if (typeof(id1) === "undefined" || typeof(id2) === "undefined") {
+      return false
+    }
+    return id1 === id2
+  }
+
+  _qualityExists(quality) {
+    return this._qualities.some((a) => {
+      return this._isSameQuality(a, quality)
+    })
   }
 
   _onMediaControlRendered() {
@@ -89,7 +108,7 @@ export default class QualitySelectionPlugin extends UICorePlugin {
       }
       for(let i=0; i<this._qualities.length; i++) {
         let quality = this._qualities[i]
-        this._$qualities[i][quality === this._chosenQuality ? "hide" : "show"]()
+        this._$qualities[i][this._isSameQuality(quality, this._chosenQuality) ? "hide" : "show"]()
       }
       this._$chosenQuality.text("Quality: "+this._chosenQuality.name)
       var visible = this._overPlugin || this._hoverTimerId !== null
@@ -102,7 +121,7 @@ export default class QualitySelectionPlugin extends UICorePlugin {
       return true
     }
     for(let i=0; i<this._qualities.length; i++) {
-      if (this._qualities[i] !== this._renderedQualities[i]) {
+      if (!this._isSameQuality(this._qualities[i], this._renderedQualities[i])) {
         return true
       }
     }
