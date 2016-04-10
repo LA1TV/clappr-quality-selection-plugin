@@ -1,5 +1,4 @@
-import {UICorePlugin, Events} from 'clappr'
-import $ from 'jQuery'
+import {UICorePlugin, Events, $} from 'clappr'
 import './style.sass'
 
 export default class QualitySelectionPlugin extends UICorePlugin {
@@ -146,14 +145,27 @@ export default class QualitySelectionPlugin extends UICorePlugin {
     this._$qualitiesContainer.append(this._$noQualitiesMsg)
     this._$qualities = []
     this._$chosenQuality = $("<div />").addClass("chosen-quality")
-    $el.hover(() => {
+    
+    var hovering = false
+    $el.bind("mouseover", () => {
+      if (hovering) {
+        return
+      }
+      hovering = true
       this._overPlugin = true
       this._renderPlugin()
-    }, () => {
+    })
+
+    $el.bind("mouseout", () => {
+      if (!hovering) {
+        return
+      }
+      hovering = false
       this._overPlugin = false
       this._onMouseOut()
       this._renderPlugin()
     })
+
     $el.append(this._$qualitiesContainer)
     $el.append(this._$chosenQuality)
     this._appendElToMediaControl()
